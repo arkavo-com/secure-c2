@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0-rc1",
+  "openapi": "3.0.3",
   "info": {
     "title": "secure-c2",
     "description": "secure command and control",
@@ -11,12 +11,117 @@
     }
   ],
   "paths": {
-    "/device": {
-      "get": {
-        "summary": "Returns a list of devices.",
+    "/device/{device-id}/report": {
+      "parameters": [
+        {
+          "in": "path",
+          "required": true,
+          "name": "device-id"
+        }
+      ],
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/tdf+nano": {
+              "schema": {
+                "format": "binary"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/device/{device-id}/command": {
+      "parameters": [
+        {
+          "in": "path",
+          "required": true,
+          "name": "device-id"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Return command in nanoTDF",
+            "content": {
+              "application/tdf+nano": {
+                "schema": {
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/device": {
+      "post": {
+        "description": "Register a device",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "header": {
+                    "type": "object",
+                    "properties": {
+                      "alg": {
+                        "enum": [
+                          "HS256"
+                        ]
+                      }
+                    }
+                  },
+                  "payload": {
+                    "$ref": "#/components/schemas/device"
+                  },
+                  "signature": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/device"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "device": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "jwk": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
